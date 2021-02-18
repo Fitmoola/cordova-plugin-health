@@ -197,6 +197,11 @@ Health.prototype.toFitActivity = function (act) {
   else return act;
 };
 
+// TODO: for now monitorSampleType is not supported in Android
+Health.prototype.monitorSampleType = function () {
+  throw new Error('not supported yet');
+};
+
 cordova.addConstructor(function () {
   navigator.health = new Health();
   return navigator.health;

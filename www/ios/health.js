@@ -585,6 +585,29 @@ Health.prototype.delete = function (data, onSuccess, onError) {
   window.plugins.healthkit.deleteSamples(data, onSuccess, onError);
 };
 
+Health.prototype.monitorSampleType = function (data, onSuccess, onError) {
+  if (!data || !data.dataType) {
+    return onError('"dataType" field is missing');
+  }
+
+  const { dataType } = data;
+  const sampleType = dataTypes[dataType];
+
+  if (!sampleType) {
+    return onError(`unknown data type "${dataType}"`);
+  }
+
+  const healthKitData = {
+    sampleType,
+  };
+
+  window.plugins.healthkit.monitorSampleType(healthKitData, onSuccess, onError);
+};
+
+Health.prototype.stopMonitoredQuery = function (data, onSuccess, onError) {
+  window.plugins.healthkit.stopMonitoredQuery(data, onSuccess, onError);
+};
+
 cordova.addConstructor(function () {
   navigator.health = new Health();
   return navigator.health;
