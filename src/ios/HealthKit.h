@@ -3,6 +3,8 @@
 
 @interface HealthKit :CDVPlugin
 
+@property(nonatomic, strong) NSMapTable *observerQueries;
+
 /**
  * Tell delegate whether or not health data is available
  *

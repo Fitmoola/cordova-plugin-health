@@ -41,8 +41,6 @@ static NSString *const HKPluginQueryId = @"queryId";
 
 // Internal interface
 @interface HealthKit (Internal)
-@property(nonatomic, strong) NSMapTable *observerQueries;
-
 - (void)checkAuthStatusWithCallbackId:(NSString *)callbackId
                               forType:(HKObjectType *)type
                         andCompletion:(void (^)(CDVPluginResult *result, NSString *innerCallbackId))completion;
@@ -79,6 +77,7 @@ static NSString *const HKPluginQueryId = @"queryId";
 #pragma mark Internal Interface
 
 @implementation HealthKit (Internal)
+
 
 /**
  * Check the authorization status for a HealthKit type and dispatch the callback with result
@@ -516,6 +515,8 @@ static NSString *const HKPluginQueryId = @"queryId";
 #pragma mark Public Interface
 
 @implementation HealthKit
+
+@synthesize observerQueries;
 
 - (void)pluginInitialize {
     [super pluginInitialize];
