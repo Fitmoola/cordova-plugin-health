@@ -198,8 +198,13 @@ Health.prototype.toFitActivity = function (act) {
 };
 
 // TODO: for now monitorSampleType is not supported in Android
-Health.prototype.monitorSampleType = function () {
-  throw new Error('not supported yet');
+Health.prototype.monitorSampleType = () => {
+  throw new Error('"monitorSampleType" not supported yet');
+};
+
+// TODO: for now stopMonitoredQuery is not supported in Android
+Health.prototype.stopMonitoredQuery = () => {
+  throw new Error('"stopMonitoredQuery" not supported yet');
 };
 
 cordova.addConstructor(function () {
