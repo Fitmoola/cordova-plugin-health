@@ -1328,22 +1328,17 @@ static NSString *const HKPluginQueryId = @"queryId";
 #ifdef HKPLUGIN_DEBUG
         NSLog(@"Observer query for query ID %@ doesn't exists", queryId);
 #endif
-        dispatch_sync(dispatch_get_main_queue(), ^{
-            NSString *errorMessage = [NSString stringWithFormat:@"Observer query for query ID %@ doesn't exists", queryId];
-            [HealthKit triggerErrorCallbackWithMessage:errorMessage command:command delegate:self.commandDelegate];
-        });
+        NSString *errorMessage = [NSString stringWithFormat:@"Observer query for query ID %@ doesn't exists", queryId];
+        [HealthKit triggerErrorCallbackWithMessage:errorMessage command:command delegate:self.commandDelegate];
     } else {
         [[HealthKit sharedHealthStore] stopQuery:query];
         [[self observerQueries] removeObjectForKey:queryId];
 
 #ifdef HKPLUGIN_DEBUG
-        NSLog(@"Observer query %@ stopped and removed", queryId);
+        NSLog(@"Observer query %@ stopped and removed, observerQueries count: %lu", queryId, [[self observerQueries] count]);
 #endif
-        dispatch_sync(dispatch_get_main_queue(), ^{
-            CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-
-            [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-        });
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
     }
 };
 
