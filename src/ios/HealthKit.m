@@ -1790,12 +1790,15 @@ static NSString *const HKPluginQueryId = @"queryId";
     NSDate *endDate = [NSDate dateWithTimeIntervalSince1970:[args[HKPluginKeyEndDate] longValue]];
 
     NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
-    NSDateComponents *components = [calendar components:(NSCalendarUnitDay | NSCalendarUnitWeekday | NSCalendarUnitYear)
-                                               fromDate:startDate toDate:endDate options: NSCalendarMatchStrictly];
-    [components setCalendar:calendar];
+    NSDateComponents *startDateComponents = [calendar components:(NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay)
+                                               fromDate:startDate];
+    NSDateComponents *endDateComponents = [calendar components:(NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay)
+                                               fromDate:endDate];
+    [startDateComponents setCalendar:calendar];
+    [endDateComponents setCalendar:calendar];
 
     HKActivitySummaryType *type = [HKObjectType activitySummaryType];
-    NSPredicate *predicate = [HKQuery predicateForActivitySummaryWithDateComponents:components];
+    NSPredicate *predicate = [HKQuery predicateForActivitySummariesBetweenStartDateComponents:startDateComponents endDateComponents:endDateComponents];
 
     NSSet *requestTypes = [NSSet setWithObjects:type, nil];
     [[HealthKit sharedHealthStore] requestAuthorizationToShareTypes:nil readTypes:requestTypes completion:^(BOOL success, NSError *error) {
