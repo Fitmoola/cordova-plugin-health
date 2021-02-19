@@ -25,7 +25,6 @@ static NSString *const HKPluginKeySourceName = @"sourceName";
 static NSString *const HKPluginKeySourceBundleId = @"sourceBundleId";
 static NSString *const HKPluginKeyMetadata = @"metadata";
 static NSString *const HKPluginKeyUUID = @"UUID";
-static NSString *const HKPluginQueryId = @"queryId";
 
 #pragma mark Categories
 
@@ -77,7 +76,6 @@ static NSString *const HKPluginQueryId = @"queryId";
 #pragma mark Internal Interface
 
 @implementation HealthKit (Internal)
-
 
 /**
  * Check the authorization status for a HealthKit type and dispatch the callback with result
@@ -516,12 +514,6 @@ static NSString *const HKPluginQueryId = @"queryId";
 
 @implementation HealthKit
 
-@synthesize observerQueries;
-
-- (void)pluginInitialize {
-    [super pluginInitialize];
-    self.observerQueries = [NSMapTable mapTableWithKeyOptions:NSMapTableCopyIn valueOptions:NSPointerFunctionsWeakMemory];
-}
 /**
  * Get shared health store
  *
@@ -735,7 +727,7 @@ static NSString *const HKPluginQueryId = @"queryId";
                                                                                             quantity:nrOfDistanceUnits
                                                                                             startDate:startDate
                                                                                                 endDate:endDate];
-                        } else {
+                        } else {      
                             sampleActivity = [HKQuantitySample quantitySampleWithType:[HKQuantityType quantityTypeForIdentifier:
                                             HKQuantityTypeIdentifierDistanceWalkingRunning]
                                                                                             quantity:nrOfDistanceUnits
@@ -1275,9 +1267,7 @@ static NSString *const HKPluginQueryId = @"queryId";
 
                                                   // Issue #47: commented this block since it resulted in callbacks not being delivered while the app was in the background
                                                   //dispatch_sync(dispatch_get_main_queue(), ^{
-                                                  NSDictionary *resultData = @{@"type":@"dataUpdate",@"value": sampleTypeString};
-
-                                                  CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:resultData];
+                                                  CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:sampleTypeString];
                                                   [result setKeepCallbackAsBool:YES];
                                                   [bSelf.commandDelegate sendPluginResult:result callbackId:command.callbackId];
                                                   //});
@@ -1288,58 +1278,15 @@ static NSString *const HKPluginQueryId = @"queryId";
     [[HealthKit sharedHealthStore] enableBackgroundDeliveryForType:type frequency:updateFrequency withCompletion:^(BOOL success, NSError *error) {
 #ifdef HKPLUGIN_DEBUG
         if (success) {
-            NSLog(@"Background delivery enabled %@", sampleTypeString);
+            NSLog(@"Background devliery enabled %@", sampleTypeString);
         } else {
             NSLog(@"Background delivery not enabled for %@ because of %@", sampleTypeString, error);
         }
         NSLog(@"Executing ObserverQuery");
 #endif
-
-        // Create a new query ID using: sample type string + current time in millis
-        long long currentTimeInMs = (long long)([[NSDate date] timeIntervalSince1970] * 1000.0);
-        NSString *queryId = [NSString stringWithFormat:@"%@-@%lld", sampleTypeString, currentTimeInMs];
-
-#ifdef HKPLUGIN_DEBUG
-        NSLog(@"New observed query ID: %@", queryId);
-#endif
-
-        [[self observerQueries] setObject:query forKey:queryId];
         [[HealthKit sharedHealthStore] executeQuery:query];
-
-        NSDictionary *resultData = @{@"type": @"queryId", @"value": queryId};
-        CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:resultData];
-        [result setKeepCallbackAsBool:YES];
-        [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+        // TODO provide some kind of callback to stop monitoring this value, store the query in some kind of WeakHashSet equilavent?
     }];
-};
-
-/**
- * Stop monitored query by the query ID. Stop executing observed query types.
- *
- * @param command *CVDInvokedUrlCommand
- */
-- (void)stopMonitoredQuery:(CDVInvokedUrlCommand *)command {
-    NSDictionary *args = command.arguments[0];
-    NSString *queryId = args[HKPluginQueryId];
-
-    HKObserverQuery *query = [[self observerQueries] objectForKey:queryId];
-
-    if (query == nil) {
-#ifdef HKPLUGIN_DEBUG
-        NSLog(@"Observer query for query ID %@ doesn't exists", queryId);
-#endif
-        NSString *errorMessage = [NSString stringWithFormat:@"Observer query for query ID %@ doesn't exists", queryId];
-        [HealthKit triggerErrorCallbackWithMessage:errorMessage command:command delegate:self.commandDelegate];
-    } else {
-        [[HealthKit sharedHealthStore] stopQuery:query];
-        [[self observerQueries] removeObjectForKey:queryId];
-
-#ifdef HKPLUGIN_DEBUG
-        NSLog(@"Observer query %@ stopped and removed, observerQueries count: %lu", queryId, [[self observerQueries] count]);
-#endif
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-    }
 };
 
 /**
@@ -1568,7 +1515,7 @@ static NSString *const HKPluginQueryId = @"queryId";
 
     // NSPredicate *predicate = [HKQuery predicateForSamplesWithStartDate:startDate endDate:endDate options:HKQueryOptionStrictStartDate];
     NSPredicate *predicate = nil;
-
+    
     BOOL filtered = (args[@"filtered"] != nil && [args[@"filtered"] boolValue]);
     if (filtered) {
         predicate = [NSPredicate predicateWithFormat:@"metadata.%K != YES", HKMetadataKeyWasUserEntered];
