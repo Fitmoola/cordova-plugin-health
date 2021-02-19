@@ -46,6 +46,7 @@ dataTypes['blood_pressure'] = 'HKCorrelationTypeIdentifierBloodPressure'; // whe
 dataTypes['resp_rate'] = 'HKQuantityTypeIdentifierRespiratoryRate';
 dataTypes['vo2max'] = 'HKQuantityTypeIdentifierVO2Max';
 dataTypes['temperature'] = 'HKQuantityTypeIdentifierBodyTemperature';
+dataTypes['apple_activity_summary'] = 'HKActivitySummaryType';
 
 // for parseable units in HK, see https://developer.apple.com/documentation/healthkit/hkunit/1615733-unitfromstring?language=objc
 var units = [];
@@ -606,6 +607,10 @@ Health.prototype.monitorSampleType = function (data, onSuccess, onError) {
 
 Health.prototype.stopMonitoredQuery = function (data, onSuccess, onError) {
   window.plugins.healthkit.stopMonitoredQuery(data, onSuccess, onError);
+};
+
+Health.prototype.queryActivitySummaryType = function (data, onSucess, onError) {
+  window.plugins.healthkit.queryActivitySummaryType(data, onSuccess, onError);
 };
 
 cordova.addConstructor(function () {

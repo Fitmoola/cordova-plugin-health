@@ -188,6 +188,11 @@ static NSString *const HKPluginQueryId = @"queryId";
         return type;
     }
 
+    if ([elem isEqualToString:@"HKActivitySummaryType"]) {
+        type = [HKObjectType activitySummaryType];
+        return type;
+    }
+
     // @TODO | The fall through here is inefficient.
     // @TODO | It needs to be refactored so the same HK method isnt called twice
     return [HealthKit getHKSampleType:elem];
@@ -234,7 +239,6 @@ static NSString *const HKPluginQueryId = @"queryId";
 
     // leave this here for if/when apple adds other sample types
     return type;
-
 }
 
 /**
@@ -1773,6 +1777,73 @@ static NSString *const HKPluginQueryId = @"queryId";
         }
     }];
     [[HealthKit sharedHealthStore] executeQuery:query];
+}
+
+/**
+ * Query a specfic data type: activity summary.
+ *
+ * @param command *CDVInvokedUrlCommand
+ */
+- (void) queryActivitySummaryType:(CDVInvokedUrlCommand*)command {
+    NSDictionary *args = command.arguments[0];
+    NSDate *startDate = [NSDate dateWithTimeIntervalSince1970:[args[HKPluginKeyStartDate] longValue]];
+    NSDate *endDate = [NSDate dateWithTimeIntervalSince1970:[args[HKPluginKeyEndDate] longValue]];
+
+    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
+    NSDateComponents *components = [calendar components:(NSCalendarUnitDay | NSCalendarUnitWeekday | NSCalendarUnitYear)
+                                               fromDate:startDate toDate:endDate options: NSCalendarMatchStrictly];
+    [components setCalendar:calendar];
+
+    HKActivitySummaryType *type = [HKObjectType activitySummaryType];
+    NSPredicate *predicate = [HKQuery predicateForActivitySummaryWithDateComponents:components];
+
+    NSSet *requestTypes = [NSSet setWithObjects:type, nil];
+    [[HealthKit sharedHealthStore] requestAuthorizationToShareTypes:nil readTypes:requestTypes completion:^(BOOL success, NSError *error) {
+        if (success) {
+            HKActivitySummaryQuery *query = [[HKActivitySummaryQuery alloc]
+                                             initWithPredicate:predicate
+                                             resultsHandler:^(HKActivitySummaryQuery *query, NSArray<HKActivitySummary *> *activitySummaries, NSError *error) {
+                if (error != nil) {
+                    dispatch_sync(dispatch_get_main_queue(), ^{
+                        [HealthKit triggerErrorCallbackWithMessage:error.localizedDescription command:command delegate:self.commandDelegate];
+                    });
+                    return;
+                }
+
+
+                HKUnit *energyUnit = [HKUnit kilocalorieUnit];
+                HKUnit *standUnit = [HKUnit countUnit];
+                HKUnit *exerciseUnit = [HKUnit minuteUnit];
+
+                NSMutableArray *finalResults = [[NSMutableArray alloc] initWithCapacity:activitySummaries.count];
+
+                for (HKActivitySummary *summary in activitySummaries) {
+                    NSMutableDictionary *activitySummaryEntry = [NSMutableDictionary dictionary];
+
+                    NSDateComponents *dateComponents = [summary dateComponentsForCalendar:calendar];
+                    long long currentTimeInMs = (long long)[[dateComponents date] timeIntervalSince1970] * 1000.0;
+
+                    activitySummaryEntry[@"date"] = [[NSNumber numberWithLongLong:currentTimeInMs] stringValue];
+                    activitySummaryEntry[@"energyBurned"] = [[NSNumber numberWithDouble:[[summary activeEnergyBurned] doubleValueForUnit:energyUnit]] stringValue];
+                    activitySummaryEntry[@"standHours"] = [[NSNumber numberWithDouble:[[summary appleStandHours] doubleValueForUnit:standUnit]] stringValue];
+                    activitySummaryEntry[@"exerciseTime"] = [[NSNumber numberWithDouble:[[summary appleExerciseTime] doubleValueForUnit:exerciseUnit]] stringValue];
+
+                    [finalResults addObject:activitySummaryEntry];
+                }
+
+                dispatch_sync(dispatch_get_main_queue(), ^{
+                    CDVPluginResult *result = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:finalResults];
+                    [self.commandDelegate sendPluginResult:result callbackId:command.callbackId];
+                });
+            }];
+
+            [[HealthKit sharedHealthStore] executeQuery:query];
+        } else {
+            dispatch_sync(dispatch_get_main_queue(), ^{
+                [HealthKit triggerErrorCallbackWithMessage:error.localizedDescription command:command delegate:self.commandDelegate];
+            });
+        }
+    }];
 }
 
 /**

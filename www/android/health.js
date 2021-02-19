@@ -207,6 +207,11 @@ Health.prototype.stopMonitoredQuery = () => {
   throw new Error('"stopMonitoredQuery" not supported yet');
 };
 
+// TODO: queryActivitySummaryType is not supported in Android
+Health.prototype.queryActivitySummaryType = function (data, onSucess, onError) {
+  throw new Error('"queryActivitySummaryType" not supported');
+};
+
 cordova.addConstructor(function () {
   navigator.health = new Health();
   return navigator.health;

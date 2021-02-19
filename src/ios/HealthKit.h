@@ -153,6 +153,13 @@
 - (void) queryCorrelationType:(CDVInvokedUrlCommand*)command;
 
 /**
+ * Query a specfic data type: activity summary.
+ *
+ * @param command *CDVInvokedUrlCommand
+ */
+- (void) queryActivitySummaryType:(CDVInvokedUrlCommand*)command;
+
+/**
  * Delete matching samples from the HealthKit store
  *
  * @param command *CDVInvokedUrlCommand
