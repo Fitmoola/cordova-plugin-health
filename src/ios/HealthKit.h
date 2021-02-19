@@ -3,6 +3,8 @@
 
 @interface HealthKit :CDVPlugin
 
+@property(nonatomic, strong) NSMapTable *observerQueries;
+
 /**
  * Tell delegate whether or not health data is available
  *
@@ -100,6 +102,13 @@
  * @param command *CDVInvokedUrlCommand
  */
 - (void) monitorSampleType:(CDVInvokedUrlCommand*)command;
+
+/**
+ * Stop executing monitored (observed) query.
+ *
+ * @param command *CDVInvokedUrlCommand
+ */
+- (void) stopMonitoredQuery:(CDVInvokedUrlCommand*)command;
 
 /**
  * Get the sum of a specified quantity type
