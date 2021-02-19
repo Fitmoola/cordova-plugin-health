@@ -1825,8 +1825,11 @@ static NSString *const HKPluginQueryId = @"queryId";
 
                     activitySummaryEntry[@"date"] = [[NSNumber numberWithLongLong:currentTimeInMs] stringValue];
                     activitySummaryEntry[@"energyBurned"] = [[NSNumber numberWithDouble:[[summary activeEnergyBurned] doubleValueForUnit:energyUnit]] stringValue];
+                    activitySummaryEntry[@"energyBurnedGoal"] = [[NSNumber numberWithDouble:[[summary activeEnergyBurnedGoal] doubleValueForUnit:energyUnit]] stringValue];
                     activitySummaryEntry[@"standHours"] = [[NSNumber numberWithDouble:[[summary appleStandHours] doubleValueForUnit:standUnit]] stringValue];
+                    activitySummaryEntry[@"standHoursGoal"] = [[NSNumber numberWithDouble:[[summary appleStandHoursGoal] doubleValueForUnit:standUnit]] stringValue];
                     activitySummaryEntry[@"exerciseTime"] = [[NSNumber numberWithDouble:[[summary appleExerciseTime] doubleValueForUnit:exerciseUnit]] stringValue];
+                    activitySummaryEntry[@"exerciseTimeGoal"] = [[NSNumber numberWithDouble:[[summary appleExerciseTimeGoal] doubleValueForUnit:exerciseUnit]] stringValue];
 
                     [finalResults addObject:activitySummaryEntry];
                 }
