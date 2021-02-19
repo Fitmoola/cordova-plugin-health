@@ -1813,7 +1813,6 @@ static NSString *const HKPluginQueryId = @"queryId";
                     return;
                 }
 
-
                 HKUnit *energyUnit = [HKUnit kilocalorieUnit];
                 HKUnit *standUnit = [HKUnit countUnit];
                 HKUnit *exerciseUnit = [HKUnit minuteUnit];
