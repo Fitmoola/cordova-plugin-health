@@ -609,7 +609,7 @@ Health.prototype.stopMonitoredQuery = function (data, onSuccess, onError) {
   window.plugins.healthkit.stopMonitoredQuery(data, onSuccess, onError);
 };
 
-Health.prototype.queryActivitySummaryType = function (data, onSucess, onError) {
+Health.prototype.queryActivitySummaryType = function (data, onSuccess, onError) {
   window.plugins.healthkit.queryActivitySummaryType(data, onSuccess, onError);
 };
 

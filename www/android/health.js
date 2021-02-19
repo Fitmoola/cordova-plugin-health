@@ -208,7 +208,7 @@ Health.prototype.stopMonitoredQuery = () => {
 };
 
 // TODO: queryActivitySummaryType is not supported in Android
-Health.prototype.queryActivitySummaryType = function (data, onSucess, onError) {
+Health.prototype.queryActivitySummaryType = function () {
   throw new Error('"queryActivitySummaryType" not supported');
 };
 
