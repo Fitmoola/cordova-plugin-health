@@ -1789,7 +1789,7 @@ static NSString *const HKPluginQueryId = @"queryId";
     NSDate *startDate = [NSDate dateWithTimeIntervalSince1970:[args[HKPluginKeyStartDate] longValue]];
     NSDate *endDate = [NSDate dateWithTimeIntervalSince1970:[args[HKPluginKeyEndDate] longValue]];
 
-    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
+    NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier: NSCalendarIdentifierISO8601];
     NSDateComponents *startDateComponents = [calendar components:(NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay)
                                                fromDate:startDate];
     NSDateComponents *endDateComponents = [calendar components:(NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay)
@@ -1822,7 +1822,7 @@ static NSString *const HKPluginQueryId = @"queryId";
                 for (HKActivitySummary *summary in activitySummaries) {
                     NSMutableDictionary *activitySummaryEntry = [NSMutableDictionary dictionary];
 
-                    NSDateComponents *dateComponents = [summary dateComponentsForCalendar:calendar];
+                    NSDateComponents *dateComponents = [summary dateComponentsForCalendar: calendar];
                     long long currentTimeInMs = (long long)[[dateComponents date] timeIntervalSince1970] * 1000.0;
 
                     activitySummaryEntry[@"date"] = [[NSNumber numberWithLongLong:currentTimeInMs] stringValue];
