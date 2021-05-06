@@ -2,3 +2,5 @@
 *.iml
 __TEST
 .DS_Store
+node_modules/
+yarn.lock
